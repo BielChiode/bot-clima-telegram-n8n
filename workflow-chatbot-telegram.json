@@ -1,0 +1,539 @@
+{
+  "name": "Bot de clima",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        -112
+      ],
+      "id": "26f7dc0d-6c9d-4d71-b106-3c99c9400ec0",
+      "name": "Telegram Trigger",
+      "webhookId": "27571c8e-51d2-4d45-9da3-39433427a5ae",
+      "credentials": {
+        "telegramApi": {
+          "id": "oeXxC7rH6trI2R76",
+          "name": "chiode_clima_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "32bae407-c586-4085-b3cf-cd3796ca82c6",
+              "name": "queue",
+              "value": "={{ $json.queue }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        672,
+        -208
+      ],
+      "id": "5b0f000c-c59b-403b-bbaa-dffd5ac5a85d",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "d08bfcd3-e546-48d9-8ae3-3d770c8cdb46",
+              "leftValue": "={{ $json.main.temp }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "exists",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "bac50ccb-666e-4677-bcda-ac69d1006595",
+              "leftValue": "={{ $json.main }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1344,
+        -208
+      ],
+      "id": "5cbdaf78-cc16-4a44-a126-7a3d7643b646",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9ecdf2a7-f644-4599-9dc6-5a1cb4fa3b8d",
+              "name": "message",
+              "value": "=🌤️ A temperatura em {{ $('Get Weather').item.json.name }} é de {{Math.round($('Get Weather').item.json.main.temp)}}°C.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2224,
+        -208
+      ],
+      "id": "2735ff6c-d47f-455d-ac84-9bdeda0fb051",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "url": "https://api.openweathermap.org/data/2.5/weather",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "lat",
+              "value": "={{ $json.lat }}"
+            },
+            {
+              "name": "lang",
+              "value": "pt_br"
+            },
+            {
+              "name": "appid",
+              "value": "={{$env.OPENWEATHER_API_KEY}}"
+            },
+            {
+              "name": "lon",
+              "value": "={{ $json.lon }}"
+            },
+            {
+              "name": "units",
+              "value": "metric"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1120,
+        -208
+      ],
+      "id": "2fea59d1-5c66-4df6-8f30-9de5f19693fc",
+      "name": "Get Weather"
+    },
+    {
+      "parameters": {
+        "url": "https://api.openweathermap.org/geo/1.0/direct",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "={{ $json.queue }}, BR"
+            },
+            {
+              "name": "appid",
+              "value": "={{$env.OPENWEATHER_API_KEY}}"
+            },
+            {
+              "name": "limit",
+              "value": "1"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        896,
+        -208
+      ],
+      "id": "27fee043-3b71-4303-9f44-de8ebd8a2705",
+      "name": "Geocodification",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "86c5b4aa-e97b-46ca-88a3-4181ba42b674",
+              "name": "message",
+              "value": "❌ Cidade não encontrada. Use o formato: Cidade,UF (ex: São Paulo,SP)",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1888,
+        -16
+      ],
+      "id": "64557979-1aea-4b14-b4e3-fcaf09f0e9a7",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "chatId": "={{$node[\"Telegram Trigger\"].json[\"message\"][\"chat\"][\"id\"]}}",
+        "text": "={{ $json.message || JSON.parse($('Message a model').item.json.content.parts[0].text).message }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2528,
+        -208
+      ],
+      "id": "33d8afbf-5255-4457-9d41-afa60f7c4c17",
+      "name": "Send a text message",
+      "webhookId": "a0d8a163-6e06-4471-a289-14de1e047f51",
+      "credentials": {
+        "telegramApi": {
+          "id": "oeXxC7rH6trI2R76",
+          "name": "chiode_clima_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Lista de UFs válidos do Brasil\nconst UFS_VALIDOS = [\n  \"AC\",\"AL\",\"AP\",\"AM\",\"BA\",\"CE\",\"DF\",\"ES\",\"GO\",\"MA\",\"MT\",\"MS\",\n  \"MG\",\"PA\",\"PB\",\"PR\",\"PE\",\"PI\",\"RJ\",\"RN\",\"RS\",\"RO\",\"RR\",\"SC\",\n  \"SP\",\"SE\",\"TO\"\n];\n\n// Texto recebido do Telegram\nconst text =  $input.first().json.message.text ||  \"\";\n\n// Limpeza básica\nconst input = text.trim();\n\n// Regex: \"Cidade,UF\"\nconst regex = /^(.+),\\s*([A-Za-z]{2})$/;\nconst match = input.match(regex);\n\nif (!match) {\n  return [\n    {\n      json: {\n        ok: false,\n        error: \"❌ Formato inválido. Use: Cidade,UF (ex: São Paulo,SP)\"\n      }\n    }\n  ];\n}\n\nlet cidade = match[1].trim();\nlet uf = match[2].toUpperCase();\n\n// Valida UF\nif (!UFS_VALIDOS.includes(uf)) {\n  return [\n    {\n      json: {\n        ok: false,\n        error: \"❌ UF inválido. Use: Cidade,UF (ex: São Paulo,SP)\"\n      }\n    }\n  ];\n}\n\n// Valida nome da cidade\nif (cidade.length < 2 || /^[0-9]+$/.test(cidade)) {\n  return [\n    {\n      json: {\n        ok: false,\n        error: \"❌ Nome de cidade inválido. Use: Cidade,UF (ex: São Paulo,SP)\"\n      }\n    }\n  ];\n}\n\n// Se passou por tudo, retorna formato normalizado\nconst queue = `${cidade},${uf}`;\n\nreturn [\n  {\n    json: {\n      ok: true,\n      queue,\n      cidade,\n      uf\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        -112
+      ],
+      "id": "41e891b7-3436-44a4-9b1c-2cb77408eb08",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ec1338a5-680e-413e-8df2-94446598dee0",
+              "leftValue": "={{ $json.ok }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        448,
+        -112
+      ],
+      "id": "4a26c679-2982-48b8-bc9d-574f6f9ea306",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.error }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        672,
+        -16
+      ],
+      "id": "ca55b22f-c597-47f3-859a-4f7532ada57a",
+      "name": "Send a text message1",
+      "webhookId": "0485113e-64ef-425d-a3fb-be1210d917cd",
+      "credentials": {
+        "telegramApi": {
+          "id": "oeXxC7rH6trI2R76",
+          "name": "chiode_clima_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "Você é um assistente que gera mensagens curtas, claras e amigáveis sobre o clima.\nResponda APENAS em JSON no formato:\n{\"message\":\"...\"}\nSem texto fora do JSON.",
+              "role": "model"
+            },
+            {
+              "content": "=Crie uma mensagem curta e amigável em português com base nesses dados:\n\nCidade: {{$json.name}}\nTemperatura: {{$json.main.temp}} °C\nSensação térmica: {{$json.main.feels_like}} °C\nDescrição: {{$json.weather[0].description}}\nVento: {{$json.wind.speed}} m/s\n\nRegras:\n- Não invente dados\n- Use emoji se fizer sentido\n- Retorne SOMENTE JSON no formato {\"message\":\"...\"}"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        1648,
+        -384
+      ],
+      "id": "f903d35f-7d9e-450e-ab4c-0ff82b2da555",
+      "name": "Message a model",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googlePalmApi": {
+          "id": "bwenp0iZARTa6e6r",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "5826bd2f-7180-4511-a38d-e95ea361f104",
+              "leftValue": "={{ $json.content.parts[0].text }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2032,
+        -384
+      ],
+      "id": "281164d3-99a1-4f7a-aa6f-aab0585dc29f",
+      "name": "If2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Geocodification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Weather": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Geocodification": {
+      "main": [
+        [
+          {
+            "node": "Get Weather",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message": {
+      "main": [
+        []
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "9ca762af-3e52-4a2b-8ce4-8fb086216221",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "4cbe97377e6b46f14898199b5d7f1b987f7723cf4c9d507975a08699eda3251a"
+  },
+  "id": "tSqtbIKd9DUfgldg",
+  "tags": []
+}
