@@ -151,7 +151,9 @@
         -208
       ],
       "id": "2fea59d1-5c66-4df6-8f30-9de5f19693fc",
-      "name": "Get Weather"
+      "name": "Get Weather",
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput"
     },
     {
       "parameters": {
@@ -183,7 +185,8 @@
       ],
       "id": "27fee043-3b71-4303-9f44-de8ebd8a2705",
       "name": "Geocodification",
-      "alwaysOutputData": true
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput"
     },
     {
       "parameters": {
@@ -529,7 +532,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "9ca762af-3e52-4a2b-8ce4-8fb086216221",
+  "versionId": "e480045f-b3be-449e-9a55-ce8255f3b345",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "4cbe97377e6b46f14898199b5d7f1b987f7723cf4c9d507975a08699eda3251a"
